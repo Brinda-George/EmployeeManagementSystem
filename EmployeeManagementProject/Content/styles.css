@@ -1,0 +1,76 @@
+﻿h1 {
+    margin-bottom: 1.25em;
+}
+
+#table-pagination {
+    display: inline-block;
+    margin-bottom: 1.75em;
+    text-align: center;
+}
+
+    #table-pagination li {
+        display: inline-block;
+    }
+
+.page-content {
+    background: #eee;
+    display: inline-block;
+    padding: 10px;
+    width: 100%;
+    max-width: 660px;
+}
+
+#title {
+    color: #337ab7;
+    font-size: 1.5vw;
+    font-family: 'Times New Roman';
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+th {
+    background-color: #337ab7;
+    color: #fff;
+}
+
+.modal-header {
+    background-color: #337ab7;
+    color: #fff;
+}
+
+#btnShowModal {
+    float: right;
+}
+
+input[type=text] {
+    padding: 0px 5px;
+}
+
+.close{
+    cursor: pointer;
+    font-size: 30px;
+}
+
+.close:hover{
+    color: white;
+}
+
+select, input[type="radio"], .sortable{
+    cursor: pointer;
+}
+
+.right{
+    float: right;
+}
+
+.center{
+    text-align: center;
+}
+
+.btn{
+    font-weight: bold;
+}
+
+.ddlAgefilter, .ddlDepartmentsfilter{
+    width: 75%;
+}

@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="EmployeeDbModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tblDepartment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Department" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <EntityType Name="tblEmployee">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FirstName" Type="nvarchar" MaxLength="50" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="50" />
+          <Property Name="Age" Type="int" />
+          <Property Name="Gender" Type="nvarchar" MaxLength="50" />
+          <Property Name="QualificationId" Type="int" />
+          <Property Name="DepartmentId" Type="int" />
+        </EntityType>
+        <EntityType Name="tblQualification">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Qualification" Type="nvarchar" MaxLength="100" />
+        </EntityType>
+        <Association Name="FK__tblEmploy__Depar__02084FDA">
+          <End Role="tblDepartment" Type="Self.tblDepartment" Multiplicity="0..1" />
+          <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblDepartment">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblEmployee">
+              <PropertyRef Name="DepartmentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblEmploy__Quali__01142BA1">
+          <End Role="tblQualification" Type="Self.tblQualification" Multiplicity="0..1" />
+          <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblQualification">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblEmployee">
+              <PropertyRef Name="QualificationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="EmployeeDbModelStoreContainer">
+          <EntitySet Name="tblDepartment" EntityType="Self.tblDepartment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblEmployee" EntityType="Self.tblEmployee" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblQualification" EntityType="Self.tblQualification" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__tblEmploy__Depar__02084FDA" Association="Self.FK__tblEmploy__Depar__02084FDA">
+            <End Role="tblDepartment" EntitySet="tblDepartment" />
+            <End Role="tblEmployee" EntitySet="tblEmployee" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblEmploy__Quali__01142BA1" Association="Self.FK__tblEmploy__Quali__01142BA1">
+            <End Role="tblQualification" EntitySet="tblQualification" />
+            <End Role="tblEmployee" EntitySet="tblEmployee" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="EmployeeDbModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="tblDepartment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Department" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Depar__02084FDA" FromRole="tblDepartment" ToRole="tblEmployee" />
+        </EntityType>
+        <EntityType Name="tblEmployee">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FirstName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Age" Type="Int32" />
+          <Property Name="Gender" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="QualificationId" Type="Int32" />
+          <Property Name="DepartmentId" Type="Int32" />
+          <NavigationProperty Name="tblDepartment" Relationship="Self.FK__tblEmploy__Depar__02084FDA" FromRole="tblEmployee" ToRole="tblDepartment" />
+          <NavigationProperty Name="tblQualification" Relationship="Self.FK__tblEmploy__Quali__01142BA1" FromRole="tblEmployee" ToRole="tblQualification" />
+        </EntityType>
+        <EntityType Name="tblQualification">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Qualification" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Quali__01142BA1" FromRole="tblQualification" ToRole="tblEmployee" />
+        </EntityType>
+        <Association Name="FK__tblEmploy__Depar__02084FDA">
+          <End Role="tblDepartment" Type="Self.tblDepartment" Multiplicity="0..1" />
+          <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblDepartment">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblEmployee">
+              <PropertyRef Name="DepartmentId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblEmploy__Quali__01142BA1">
+          <End Role="tblQualification" Type="Self.tblQualification" Multiplicity="0..1" />
+          <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblQualification">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblEmployee">
+              <PropertyRef Name="QualificationId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="EmployeeDbContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tblDepartments" EntityType="Self.tblDepartment" />
+          <EntitySet Name="tblEmployees" EntityType="Self.tblEmployee" />
+          <EntitySet Name="tblQualifications" EntityType="Self.tblQualification" />
+          <AssociationSet Name="FK__tblEmploy__Depar__02084FDA" Association="Self.FK__tblEmploy__Depar__02084FDA">
+            <End Role="tblDepartment" EntitySet="tblDepartments" />
+            <End Role="tblEmployee" EntitySet="tblEmployees" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblEmploy__Quali__01142BA1" Association="Self.FK__tblEmploy__Quali__01142BA1">
+            <End Role="tblQualification" EntitySet="tblQualifications" />
+            <End Role="tblEmployee" EntitySet="tblEmployees" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="EmployeeDbModelStoreContainer" CdmEntityContainer="EmployeeDbContext">
+          <EntitySetMapping Name="tblDepartments">
+            <EntityTypeMapping TypeName="EmployeeDbModel.tblDepartment">
+              <MappingFragment StoreEntitySet="tblDepartment">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Department" ColumnName="Department" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblEmployees">
+            <EntityTypeMapping TypeName="EmployeeDbModel.tblEmployee">
+              <MappingFragment StoreEntitySet="tblEmployee">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="Age" ColumnName="Age" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="QualificationId" ColumnName="QualificationId" />
+                <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tblQualifications">
+            <EntityTypeMapping TypeName="EmployeeDbModel.tblQualification">
+              <MappingFragment StoreEntitySet="tblQualification">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Qualification" ColumnName="Qualification" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
