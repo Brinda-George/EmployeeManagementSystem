@@ -11,7 +11,7 @@ namespace EmployeeManagementProject
 {
 
 
-    public partial class _Default
+    public partial class Charts
     {
     }
 }

@@ -19,9 +19,19 @@ namespace EmployeeManagementProject.Models
         public string LastName { get; set; }
         public Nullable<int> Age { get; set; }
         public string Gender { get; set; }
+        public Nullable<System.DateTime> DateOfBirth { get; set; }
         public Nullable<int> QualificationId { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public Nullable<int> CountryId { get; set; }
         public Nullable<int> DepartmentId { get; set; }
+        public Nullable<int> Experience { get; set; }
+        public string Mobile { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     
+        public virtual tblCountry tblCountry { get; set; }
         public virtual tblDepartment tblDepartment { get; set; }
         public virtual tblQualification tblQualification { get; set; }
     }

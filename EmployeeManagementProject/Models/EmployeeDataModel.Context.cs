@@ -25,6 +25,7 @@ namespace EmployeeManagementProject.Models
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<tblCountry> tblCountries { get; set; }
         public virtual DbSet<tblDepartment> tblDepartments { get; set; }
         public virtual DbSet<tblEmployee> tblEmployees { get; set; }
         public virtual DbSet<tblQualification> tblQualifications { get; set; }

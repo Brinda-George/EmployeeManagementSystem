@@ -4,12 +4,14 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="e37e875910934211ac1d2fe9693fa6e7" Name="Diagram1">
-        <EntityTypeShape EntityType="EmployeeDbModel.tblDepartment" Width="1.5" PointX="0.75" PointY="1.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="EmployeeDbModel.tblEmployee" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="EmployeeDbModel.tblQualification" Width="1.5" PointX="0.75" PointY="5.5" IsExpanded="true" />
-        <AssociationConnector Association="EmployeeDbModel.FK__tblEmploy__Depar__02084FDA" ManuallyRouted="false" />
-        <AssociationConnector Association="EmployeeDbModel.FK__tblEmploy__Quali__01142BA1" ManuallyRouted="false" />
+      <Diagram DiagramId="72e9dea3229d455582d238cf262a8171" Name="Diagram1">
+        <EntityTypeShape EntityType="EmployeeDbModel.tblCountry" Width="1.5" PointX="0.75" PointY="3.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="EmployeeDbModel.tblDepartment" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="EmployeeDbModel.tblEmployee" Width="1.5" PointX="3" PointY="2.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="EmployeeDbModel.tblQualification" Width="1.5" PointX="0.75" PointY="7.125" IsExpanded="true" />
+        <AssociationConnector Association="EmployeeDbModel.FK__tblEmploy__Count__1332DBDC" ManuallyRouted="false" />
+        <AssociationConnector Association="EmployeeDbModel.FK__tblEmploy__Depar__14270015" ManuallyRouted="false" />
+        <AssociationConnector Association="EmployeeDbModel.FK__tblEmploy__Quali__151B244E" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

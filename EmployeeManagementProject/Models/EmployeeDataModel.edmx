@@ -5,6 +5,13 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
       <Schema Namespace="EmployeeDbModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tblCountry">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CountryName" Type="nvarchar" MaxLength="100" />
+        </EntityType>
         <EntityType Name="tblDepartment">
           <Key>
             <PropertyRef Name="Id" />
@@ -21,8 +28,17 @@
           <Property Name="LastName" Type="nvarchar" MaxLength="50" />
           <Property Name="Age" Type="int" />
           <Property Name="Gender" Type="nvarchar" MaxLength="50" />
+          <Property Name="DateOfBirth" Type="date" />
           <Property Name="QualificationId" Type="int" />
+          <Property Name="Address" Type="nvarchar" MaxLength="250" />
+          <Property Name="City" Type="nvarchar" MaxLength="100" />
+          <Property Name="State" Type="nvarchar" MaxLength="100" />
+          <Property Name="CountryId" Type="int" />
           <Property Name="DepartmentId" Type="int" />
+          <Property Name="Experience" Type="int" />
+          <Property Name="Mobile" Type="nvarchar" MaxLength="10" />
+          <Property Name="Email" Type="nvarchar" MaxLength="50" />
+          <Property Name="Password" Type="nvarchar" MaxLength="100" />
         </EntityType>
         <EntityType Name="tblQualification">
           <Key>
@@ -31,7 +47,19 @@
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Qualification" Type="nvarchar" MaxLength="100" />
         </EntityType>
-        <Association Name="FK__tblEmploy__Depar__02084FDA">
+        <Association Name="FK__tblEmploy__Count__1332DBDC">
+          <End Role="tblCountry" Type="Self.tblCountry" Multiplicity="0..1" />
+          <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCountry">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblEmployee">
+              <PropertyRef Name="CountryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblEmploy__Depar__14270015">
           <End Role="tblDepartment" Type="Self.tblDepartment" Multiplicity="0..1" />
           <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
           <ReferentialConstraint>
@@ -43,7 +71,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__tblEmploy__Quali__01142BA1">
+        <Association Name="FK__tblEmploy__Quali__151B244E">
           <End Role="tblQualification" Type="Self.tblQualification" Multiplicity="0..1" />
           <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
           <ReferentialConstraint>
@@ -56,14 +84,19 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="EmployeeDbModelStoreContainer">
+          <EntitySet Name="tblCountry" EntityType="Self.tblCountry" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblDepartment" EntityType="Self.tblDepartment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblEmployee" EntityType="Self.tblEmployee" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblQualification" EntityType="Self.tblQualification" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK__tblEmploy__Depar__02084FDA" Association="Self.FK__tblEmploy__Depar__02084FDA">
+          <AssociationSet Name="FK__tblEmploy__Count__1332DBDC" Association="Self.FK__tblEmploy__Count__1332DBDC">
+            <End Role="tblCountry" EntitySet="tblCountry" />
+            <End Role="tblEmployee" EntitySet="tblEmployee" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblEmploy__Depar__14270015" Association="Self.FK__tblEmploy__Depar__14270015">
             <End Role="tblDepartment" EntitySet="tblDepartment" />
             <End Role="tblEmployee" EntitySet="tblEmployee" />
           </AssociationSet>
-          <AssociationSet Name="FK__tblEmploy__Quali__01142BA1" Association="Self.FK__tblEmploy__Quali__01142BA1">
+          <AssociationSet Name="FK__tblEmploy__Quali__151B244E" Association="Self.FK__tblEmploy__Quali__151B244E">
             <End Role="tblQualification" EntitySet="tblQualification" />
             <End Role="tblEmployee" EntitySet="tblEmployee" />
           </AssociationSet>
@@ -73,13 +106,21 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="EmployeeDbModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="tblCountry">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CountryName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Count__1332DBDC" FromRole="tblCountry" ToRole="tblEmployee" />
+        </EntityType>
         <EntityType Name="tblDepartment">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Department" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Depar__02084FDA" FromRole="tblDepartment" ToRole="tblEmployee" />
+          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Depar__14270015" FromRole="tblDepartment" ToRole="tblEmployee" />
         </EntityType>
         <EntityType Name="tblEmployee">
           <Key>
@@ -90,10 +131,20 @@
           <Property Name="LastName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="Age" Type="Int32" />
           <Property Name="Gender" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="DateOfBirth" Type="DateTime" Precision="0" />
           <Property Name="QualificationId" Type="Int32" />
+          <Property Name="Address" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="City" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="State" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CountryId" Type="Int32" />
           <Property Name="DepartmentId" Type="Int32" />
-          <NavigationProperty Name="tblDepartment" Relationship="Self.FK__tblEmploy__Depar__02084FDA" FromRole="tblEmployee" ToRole="tblDepartment" />
-          <NavigationProperty Name="tblQualification" Relationship="Self.FK__tblEmploy__Quali__01142BA1" FromRole="tblEmployee" ToRole="tblQualification" />
+          <Property Name="Experience" Type="Int32" />
+          <Property Name="Mobile" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Password" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tblCountry" Relationship="Self.FK__tblEmploy__Count__1332DBDC" FromRole="tblEmployee" ToRole="tblCountry" />
+          <NavigationProperty Name="tblDepartment" Relationship="Self.FK__tblEmploy__Depar__14270015" FromRole="tblEmployee" ToRole="tblDepartment" />
+          <NavigationProperty Name="tblQualification" Relationship="Self.FK__tblEmploy__Quali__151B244E" FromRole="tblEmployee" ToRole="tblQualification" />
         </EntityType>
         <EntityType Name="tblQualification">
           <Key>
@@ -101,9 +152,21 @@
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Qualification" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Quali__01142BA1" FromRole="tblQualification" ToRole="tblEmployee" />
+          <NavigationProperty Name="tblEmployees" Relationship="Self.FK__tblEmploy__Quali__151B244E" FromRole="tblQualification" ToRole="tblEmployee" />
         </EntityType>
-        <Association Name="FK__tblEmploy__Depar__02084FDA">
+        <Association Name="FK__tblEmploy__Count__1332DBDC">
+          <End Role="tblCountry" Type="Self.tblCountry" Multiplicity="0..1" />
+          <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tblCountry">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="tblEmployee">
+              <PropertyRef Name="CountryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__tblEmploy__Depar__14270015">
           <End Role="tblDepartment" Type="Self.tblDepartment" Multiplicity="0..1" />
           <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
           <ReferentialConstraint>
@@ -115,7 +178,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__tblEmploy__Quali__01142BA1">
+        <Association Name="FK__tblEmploy__Quali__151B244E">
           <End Role="tblQualification" Type="Self.tblQualification" Multiplicity="0..1" />
           <End Role="tblEmployee" Type="Self.tblEmployee" Multiplicity="*" />
           <ReferentialConstraint>
@@ -128,14 +191,19 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="EmployeeDbContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tblCountries" EntityType="Self.tblCountry" />
           <EntitySet Name="tblDepartments" EntityType="Self.tblDepartment" />
           <EntitySet Name="tblEmployees" EntityType="Self.tblEmployee" />
           <EntitySet Name="tblQualifications" EntityType="Self.tblQualification" />
-          <AssociationSet Name="FK__tblEmploy__Depar__02084FDA" Association="Self.FK__tblEmploy__Depar__02084FDA">
+          <AssociationSet Name="FK__tblEmploy__Count__1332DBDC" Association="Self.FK__tblEmploy__Count__1332DBDC">
+            <End Role="tblCountry" EntitySet="tblCountries" />
+            <End Role="tblEmployee" EntitySet="tblEmployees" />
+          </AssociationSet>
+          <AssociationSet Name="FK__tblEmploy__Depar__14270015" Association="Self.FK__tblEmploy__Depar__14270015">
             <End Role="tblDepartment" EntitySet="tblDepartments" />
             <End Role="tblEmployee" EntitySet="tblEmployees" />
           </AssociationSet>
-          <AssociationSet Name="FK__tblEmploy__Quali__01142BA1" Association="Self.FK__tblEmploy__Quali__01142BA1">
+          <AssociationSet Name="FK__tblEmploy__Quali__151B244E" Association="Self.FK__tblEmploy__Quali__151B244E">
             <End Role="tblQualification" EntitySet="tblQualifications" />
             <End Role="tblEmployee" EntitySet="tblEmployees" />
           </AssociationSet>
@@ -146,6 +214,14 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="EmployeeDbModelStoreContainer" CdmEntityContainer="EmployeeDbContext">
+          <EntitySetMapping Name="tblCountries">
+            <EntityTypeMapping TypeName="EmployeeDbModel.tblCountry">
+              <MappingFragment StoreEntitySet="tblCountry">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="CountryName" ColumnName="CountryName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="tblDepartments">
             <EntityTypeMapping TypeName="EmployeeDbModel.tblDepartment">
               <MappingFragment StoreEntitySet="tblDepartment">
@@ -162,8 +238,17 @@
                 <ScalarProperty Name="LastName" ColumnName="LastName" />
                 <ScalarProperty Name="Age" ColumnName="Age" />
                 <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
                 <ScalarProperty Name="QualificationId" ColumnName="QualificationId" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="City" ColumnName="City" />
+                <ScalarProperty Name="State" ColumnName="State" />
+                <ScalarProperty Name="CountryId" ColumnName="CountryId" />
                 <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
+                <ScalarProperty Name="Experience" ColumnName="Experience" />
+                <ScalarProperty Name="Mobile" ColumnName="Mobile" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

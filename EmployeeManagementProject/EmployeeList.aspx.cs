@@ -1,6 +1,7 @@
 ﻿using EmployeeManagementProject.Models;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Spire.Xls;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Script.Services;
+using System.Web.Security;
 using System.Web.Services;
 using System.Web.UI.WebControls;
 using listItem = System.Web.UI.WebControls.ListItem;
@@ -18,6 +20,14 @@ namespace EmployeeManagementProject
 {
     public partial class EmployeeList : System.Web.UI.Page
     {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Session["UserID"] == null)
+            {
+                Response.Redirect("Login.aspx");
+            }
+        }
+
         static EmployeeDbContext dbContext = new EmployeeDbContext();
 
         [WebMethod()]
@@ -41,6 +51,18 @@ namespace EmployeeManagementProject
                 {
                     Id = s.Id,
                     Department = s.Department
+                }).ToList();
+        }
+
+        [WebMethod()]
+        [ScriptMethod]
+        public static List<CountryModel> GetCountries()
+        {
+            return dbContext.tblCountries
+                .Select(s => new CountryModel
+                {
+                    Id = s.Id,
+                    CountryName = s.CountryName
                 }).ToList();
         }
 
@@ -73,10 +95,24 @@ namespace EmployeeManagementProject
                 departments.Add(selectlistitem);
             }
 
+            List<CountryModel> countryList = GetCountries();
+            List<listItem> countries = new List<listItem>();
+            foreach (CountryModel countryModel in countryList)
+            {
+                listItem selectlistitem = new listItem
+                {
+                    Text = countryModel.CountryName,
+                    Value = countryModel.Id.ToString()
+
+                };
+                countries.Add(selectlistitem);
+            }
+
             var data = new MasterDataViewModel
             {
                 QualificationList = qualifications,
-                DepartmentList = departments
+                DepartmentList = departments,
+                CountryList = countries
             };
             return data;
         }
@@ -87,8 +123,7 @@ namespace EmployeeManagementProject
         {
             try
             {
-                int count = dbContext.tblEmployees.Where(e => e.ID == employee.ID).Count();
-                if (count == 0)
+                if (employee.ID == 0)
                 {
                     dbContext.tblEmployees.Add(new tblEmployee
                     {
@@ -97,7 +132,16 @@ namespace EmployeeManagementProject
                         Age = employee.Age,
                         Gender = employee.Gender,
                         QualificationId = employee.QualificationId,
-                        DepartmentId = employee.DepartmentId
+                        DepartmentId = employee.DepartmentId,
+                        Address = employee.Address,
+                        City = employee.City,
+                        State = employee.State,
+                        CountryId = employee.CountryId,
+                        DateOfBirth = employee.DateOfBirth,
+                        Email = employee.Email,
+                        Experience = employee.Experience,
+                        Mobile = employee.Mobile,
+                        Password = FormsAuthentication.HashPasswordForStoringInConfigFile(employee.Password, "sha1")
                     });
                     dbContext.SaveChanges();
                     return Constants.employeeAdded;
@@ -111,6 +155,14 @@ namespace EmployeeManagementProject
                     model.Gender = employee.Gender;
                     model.QualificationId = employee.QualificationId;
                     model.DepartmentId = employee.DepartmentId;
+                    model.Address = employee.Address;
+                    model.City = employee.City;
+                    model.State = employee.State;
+                    model.CountryId = employee.CountryId;
+                    model.DateOfBirth = employee.DateOfBirth;
+                    model.Experience = employee.Experience;
+                    model.Mobile = employee.Mobile;
+                    model.Email = employee.Email;
                     dbContext.SaveChanges();
                     return Constants.employeeUpdated;
                 }
@@ -147,7 +199,7 @@ namespace EmployeeManagementProject
             model.PageIndex = pageIndex;
             model.PageSize = pageSize;
             model.PageContent = true;
-            var employeeList = dbContext2.tblEmployees.Join
+            var employeeList = dbContext2.tblEmployees.Where(e => e.FirstName != "admin").Join
               (dbContext2.tblQualifications, e => e.QualificationId, q => q.Id, (e, q) => new
               {
                   e.ID,
@@ -156,6 +208,14 @@ namespace EmployeeManagementProject
                   e.Age,
                   e.Gender,
                   e.DepartmentId,
+                  e.Address,
+                  e.City,
+                  e.State,
+                  e.CountryId,
+                  e.DateOfBirth,
+                  e.Email,
+                  e.Experience,
+                  e.Mobile,
                   q.Qualification
               })
               .Join(dbContext2.tblDepartments, s => s.DepartmentId, d => d.Id, (s, d) => new
@@ -167,7 +227,33 @@ namespace EmployeeManagementProject
                   s.Gender,
                   s.DepartmentId,
                   s.Qualification,
-                  d.Department
+                  d.Department,
+                  s.Address,
+                  s.City,
+                  s.State,
+                  s.CountryId,
+                  s.DateOfBirth,
+                  s.Email,
+                  s.Experience,
+                  s.Mobile
+              })
+              .Join(dbContext2.tblCountries, s => s.CountryId, d => d.Id, (c, f) => new
+              {
+                  c.ID,
+                  c.FirstName,
+                  c.LastName,
+                  c.Age,
+                  c.Gender,
+                  c.Qualification,
+                  c.Department,
+                  c.Address,
+                  c.City,
+                  c.State,
+                  f.CountryName,
+                  c.DateOfBirth,
+                  c.Email,
+                  c.Experience,
+                  c.Mobile
               });
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -198,12 +284,30 @@ namespace EmployeeManagementProject
                 case "Department":
                     employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Department) : employeeList.OrderBy(e => e.Department);
                     break;
+                case "City":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.City) : employeeList.OrderBy(e => e.City);
+                    break;
+                case "State":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.State) : employeeList.OrderBy(e => e.State);
+                    break;
+                case "Country":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.CountryName) : employeeList.OrderBy(e => e.CountryName);
+                    break;
+                case "Experience":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Experience) : employeeList.OrderBy(e => e.Experience);
+                    break;
+                case "Email":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Email) : employeeList.OrderBy(e => e.Email);
+                    break;
+                case "Mobile":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Mobile) : employeeList.OrderBy(e => e.Mobile);
+                    break;
                 default:
                     employeeList = employeeList.OrderBy(e => e.ID);
                     break;
             }
             model.TotalPages = (int)Math.Ceiling((decimal)employeeList.Count() / pageSize);
-            if(employeeList.Skip((pageIndex - 1) * model.PageSize).Take(model.PageSize).Count() > 0)
+            if (employeeList.Skip((pageIndex - 1) * model.PageSize).Take(model.PageSize).Count() > 0)
             {
                 employeeList = employeeList.Skip((pageIndex - 1) * model.PageSize).Take(model.PageSize);
             }
@@ -219,7 +323,15 @@ namespace EmployeeManagementProject
                 Age = s.Age,
                 Gender = s.Gender,
                 Qualification = s.Qualification,
-                Department = s.Department
+                Department = s.Department,
+                Address = s.Address,
+                City = s.City,
+                State = s.State,
+                Country = s.CountryName,
+                DateOfBirth = s.DateOfBirth,
+                Experience = s.Experience,
+                Email = s.Email,
+                Mobile = s.Mobile
             }).ToList();
             return model;
         }
@@ -237,101 +349,264 @@ namespace EmployeeManagementProject
                     Age = s.Age,
                     Gender = s.Gender,
                     QualificationId = s.QualificationId,
-                    DepartmentId = s.DepartmentId
+                    DepartmentId = s.DepartmentId,
+                    Address = s.Address,
+                    City = s.City,
+                    State = s.State,
+                    CountryId = s.CountryId,
+                    DateOfBirth = s.DateOfBirth,
+                    Experience = s.Experience,
+                    Email = s.Email,
+                    Mobile = s.Mobile,
+                    Password = s.Password
                 }).Single();
             return employee;
         }
 
-        //[WebMethod()]
-        //public static string ExportToPdf(string tableHtml)
-        //{
-        //    string sb = HttpUtility.HtmlDecode("<!DOCTYPE html><html><head></head><body>" + Regex.Replace(tableHtml, @"\n", "") + "</body></html>");
-        //    StringReader sr = new StringReader(sb);
-        //    Document document = new Document(PageSize.A4, 10f, 10f, 30f, 0f);
-        //    document.SetPageSize(iTextSharp.text.PageSize.A4.Rotate());
-        //    using (MemoryStream memoryStream = new MemoryStream())
-        //    {
-        //        Stream htmlstream = GenerateStreamFromString(sb);
-        //        Stream cssstream = null;
-        //        PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
-        //        document.Open();
-        //        XMLWorkerHelper.GetInstance().ParseXHtml(writer, document, htmlstream, cssstream);
-        //        document.Close();
-        //        byte[] bytes = memoryStream.ToArray();
-        //        memoryStream.Close();
-
-        //        //HttpResponse Response = HttpContext.Current.Response;
-        //        //Response.Clear();
-        //        //Response.ContentType = "application/pdf";
-        //        //Response.AddHeader("Content-Disposition", "attachment; filename=table.pdf");
-        //        //Response.Buffer = true;
-        //        //Response.Cache.SetCacheability(HttpCacheability.NoCache);
-        //        //Response.BinaryWrite(bytes);
-        //        ////Response.End();
-        //        //Response.Close();
-
-        //        MemoryStream ms = new MemoryStream(bytes);
-        //        FileStream file = new FileStream(HttpContext.Current.Server.MapPath("~/Files/pdfTable.pdf"), FileMode.Create, FileAccess.Write);
-        //        ms.WriteTo(file);
-        //        file.Close();
-        //        ms.Close();
-        //    }
-        //    //return HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Host + "/" + "App_Data/pdfTable.pdf";
-        //    return Constants.exportedToPdf;
-        //}
-
-        //public static Stream GenerateStreamFromString(string s)
-        //{
-        //    MemoryStream stream = new MemoryStream();
-        //    StreamWriter writer = new StreamWriter(stream);
-        //    writer.Write(s);
-        //    writer.Flush();
-        //    stream.Position = 0;
-        //    return stream;
-        //}
+        [WebMethod()]
+        public static List<EmployeeModel> GetFullEmployeeList(string sortOrder, string sortColumn, string searchString, int filterGender, string filterDepartment)
+        {
+            EmployeeDbContext dbContext = new EmployeeDbContext();
+            var employeeList = dbContext.tblEmployees.Where(e=> e.FirstName != "admin").Join
+             (dbContext.tblQualifications, e => e.QualificationId, q => q.Id, (e, q) => new
+             {
+                 e.ID,
+                 e.FirstName,
+                 e.LastName,
+                 e.Age,
+                 e.Gender,
+                 e.DepartmentId,
+                 e.Address,
+                 e.City,
+                 e.State,
+                 e.CountryId,
+                 e.DateOfBirth,
+                 e.Email,
+                 e.Experience,
+                 e.Mobile,
+                 q.Qualification
+             })
+             .Join(dbContext.tblDepartments, s => s.DepartmentId, d => d.Id, (s, d) => new
+             {
+                 s.ID,
+                 s.FirstName,
+                 s.LastName,
+                 s.Age,
+                 s.Gender,
+                 s.DepartmentId,
+                 s.Qualification,
+                 d.Department,
+                 s.Address,
+                 s.City,
+                 s.State,
+                 s.CountryId,
+                 s.DateOfBirth,
+                 s.Email,
+                 s.Experience,
+                 s.Mobile
+             })
+             .Join(dbContext.tblCountries, s => s.CountryId, d => d.Id, (c, f) => new
+             {
+                 c.ID,
+                 c.FirstName,
+                 c.LastName,
+                 c.Age,
+                 c.Gender,
+                 c.Qualification,
+                 c.Department,
+                 c.Address,
+                 c.City,
+                 c.State,
+                 f.CountryName,
+                 c.DateOfBirth,
+                 c.Email,
+                 c.Experience,
+                 c.Mobile
+             });
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                employeeList = employeeList.Where(e => e.FirstName.ToLower().StartsWith(searchString.ToLower()) || e.LastName.ToLower().StartsWith(searchString.ToLower()));
+            }
+            if (filterGender > 0)
+            {
+                employeeList = employeeList.Where(e => e.Age == filterGender);
+            }
+            if (!String.IsNullOrEmpty(filterDepartment))
+            {
+                employeeList = employeeList.Where(e => e.Department.ToLower().StartsWith(filterDepartment.ToLower()));
+            }
+            switch (sortColumn)
+            {
+                case "FirstName":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.FirstName) : employeeList.OrderBy(e => e.FirstName);
+                    break;
+                case "Age":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Age) : employeeList.OrderBy(e => e.Age);
+                    break;
+                case "Gender":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Gender) : employeeList.OrderBy(e => e.Gender);
+                    break;
+                case "Qualification":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Qualification) : employeeList.OrderBy(e => e.Qualification);
+                    break;
+                case "Department":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Department) : employeeList.OrderBy(e => e.Department);
+                    break;
+                case "City":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.City) : employeeList.OrderBy(e => e.City);
+                    break;
+                case "State":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.State) : employeeList.OrderBy(e => e.State);
+                    break;
+                case "Country":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.CountryName) : employeeList.OrderBy(e => e.CountryName);
+                    break;
+                case "Experience":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Experience) : employeeList.OrderBy(e => e.Experience);
+                    break;
+                case "Email":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Email) : employeeList.OrderBy(e => e.Email);
+                    break;
+                case "Mobile":
+                    employeeList = (sortOrder.ToLower() == "desc") ? employeeList.OrderByDescending(e => e.Mobile) : employeeList.OrderBy(e => e.Mobile);
+                    break;
+                default:
+                    employeeList = employeeList.OrderBy(e => e.ID);
+                    break;
+            }
+            return employeeList.Select(s => new EmployeeModel
+            {
+                ID = s.ID,
+                FirstName = s.FirstName,
+                LastName = s.LastName,
+                Age = s.Age,
+                Gender = s.Gender,
+                Qualification = s.Qualification,
+                Department = s.Department,
+                Address = s.Address,
+                City = s.City,
+                State = s.State,
+                Country = s.CountryName,
+                DateOfBirth = s.DateOfBirth,
+                Experience = s.Experience,
+                Email = s.Email,
+                Mobile = s.Mobile
+            }).ToList();
+        }
 
         [WebMethod()]
-        public static string GeneratePdf()
+        public static string GeneratePdf(string sortOrder, string sortColumn, string searchString, int filterGender, string filterDepartment)
         {
+            List<EmployeeModel> employees = GetFullEmployeeList(sortOrder, sortColumn, searchString, filterGender, filterDepartment);
             HttpServerUtility server = HttpContext.Current.Server;
-            string path = server.MapPath("~/Reports/myfile.pdf");
-            if (!Directory.Exists(server.MapPath("~/Reports")))
-                Directory.CreateDirectory(server.MapPath("~/Reports"));
-
+            if (!Directory.Exists(server.MapPath("~/Files")))
+                Directory.CreateDirectory(server.MapPath("~/Files"));
+            DirectoryInfo di = new DirectoryInfo(server.MapPath("~/Files"));
+            foreach (FileInfo fileInfo in di.GetFiles())
+            {
+                fileInfo.Delete();
+            }
             Rectangle pagesize = new Rectangle(20, 20, PageSize.A4.Width, PageSize.A4.Height);
             Document doc = new Document(pagesize, 10, 10, 50, 10);
             MemoryStream ms = new MemoryStream();
             PdfWriter pw = PdfWriter.GetInstance(doc, ms);
             doc.Open();
-            HttpResponse Response = HttpContext.Current.Response;
 
-            PdfPTable tbl = new PdfPTable(4);
-            tbl.AddCell("Sr No");
-            tbl.AddCell("Name");
-            tbl.AddCell("Address");
-            tbl.AddCell("Phone");
-            for (int i = 1; i < 6; i++)
+            PdfPTable tbl = new PdfPTable(8);
+            tbl.AddCell("S No");
+            tbl.AddCell("Emp No");
+            tbl.AddCell("First Name");
+            tbl.AddCell("Last Name");
+            tbl.AddCell("Age");
+            tbl.AddCell("Gender");
+            tbl.AddCell("Qualification");
+            tbl.AddCell("Department");
+            for (int i = 0; i < employees.Count(); i++)
             {
-                tbl.AddCell(i.ToString());
-                tbl.AddCell("Name " + i.ToString());
-                tbl.AddCell("Address " + i.ToString());
-                tbl.AddCell("6789655" + i.ToString());
+                tbl.AddCell((i + 1).ToString());
+                tbl.AddCell("EMP-" + employees[i].ID.ToString());
+                tbl.AddCell(employees[i].FirstName);
+                tbl.AddCell(employees[i].LastName);
+                tbl.AddCell(employees[i].Age.ToString());
+                tbl.AddCell(employees[i].Gender);
+                tbl.AddCell(employees[i].Qualification);
+                tbl.AddCell(employees[i].Department);
             }
             doc.Add(tbl);
-
             doc.Close();
             byte[] byteArray = ms.ToArray();
             ms.Flush();
             ms.Close();
             ms.Dispose();
-            Response.Clear();
-            Response.AddHeader("Content-Disposition", "attachment; filename=myfile.pdf");
-            Response.AddHeader("Content-Length", byteArray.Length.ToString());
-            Response.ContentType = "application/octet-stream";
-            Response.BinaryWrite(byteArray);
-            return Constants.exportedToPdf;
+            MemoryStream memorystream = new MemoryStream(byteArray);
+            string fullPath = "/Files/Employeetable_" + DateTime.Now.Ticks + ".pdf";
+            FileStream file = new FileStream(HttpContext.Current.Server.MapPath(fullPath), FileMode.Create, FileAccess.Write);
+            memorystream.WriteTo(file);
+            file.Close();
+            memorystream.Close();
+            return fullPath;
         }
 
+        [WebMethod()]
+        public static string GenerateExcel(string sortOrder, string sortColumn, string searchString, int filterGender, string filterDepartment)
+        {
+            List<EmployeeModel> employees = GetFullEmployeeList(sortOrder, sortColumn, searchString, filterGender, filterDepartment);
+            HttpServerUtility server = HttpContext.Current.Server;
+            if (!Directory.Exists(server.MapPath("~/Files")))
+                Directory.CreateDirectory(server.MapPath("~/Files"));
+            DirectoryInfo di = new DirectoryInfo(server.MapPath("~/Files"));
+            foreach (FileInfo fileInfo in di.GetFiles())
+            {
+                fileInfo.Delete();
+            }
+            DataTable dt = new DataTable();
+            dt.Columns.Add("S No", typeof(int));
+            dt.Columns.Add("Emp No", typeof(String));
+            dt.Columns.Add("First Name", typeof(String));
+            dt.Columns.Add("Last Name", typeof(String));
+            dt.Columns.Add("Age", typeof(int));
+            dt.Columns.Add("Gender", typeof(String));
+            dt.Columns.Add("DateOfBirth", typeof(String));
+            dt.Columns.Add("Qualification", typeof(String));
+            dt.Columns.Add("Department", typeof(String));
+            dt.Columns.Add("Address", typeof(String));
+            dt.Columns.Add("City", typeof(String));
+            dt.Columns.Add("State", typeof(String));
+            dt.Columns.Add("Country", typeof(String));
+            dt.Columns.Add("Experience", typeof(String));
+            dt.Columns.Add("Mobile", typeof(String));
+            dt.Columns.Add("Email", typeof(String));
+            int i = 1;
+            foreach (EmployeeModel employee in employees)
+            {
+                DataRow newRow = dt.NewRow();
+                newRow["S No"] = i;
+                newRow["Emp No"] = "EMP" + employee.ID;
+                newRow["First Name"] = employee.FirstName;
+                newRow["Last Name"] = employee.LastName;
+                newRow["Age"] = employee.Age;
+                newRow["Gender"] = employee.Gender;
+                newRow["DateOfBirth"] = employee.DateOfBirth;
+                newRow["Qualification"] = employee.Qualification;
+                newRow["Department"] = employee.Department;
+                newRow["Address"] = employee.Address;
+                newRow["City"] = employee.City;
+                newRow["State"] = employee.State;
+                newRow["Country"] = employee.Country;
+                newRow["Experience"] = employee.Experience;
+                newRow["Mobile"] = employee.Mobile;
+                newRow["Email"] = employee.Email;
+                dt.Rows.Add(newRow);
+                i++;
+            }
+
+            Workbook book = new Workbook();
+            Worksheet sheet = book.Worksheets[0];
+            sheet.InsertDataTable(dt, true, 1, 1);
+            string fullFilePath = "/Files/EmployeeTable_" + DateTime.Now.Ticks + ".xls";
+            book.SaveToFile(HttpContext.Current.Server.MapPath(fullFilePath));
+            return fullFilePath;
+        }
 
     }
 }

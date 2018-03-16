@@ -2,15 +2,26 @@
     margin-bottom: 1.25em;
 }
 
-#table-pagination {
-    display: inline-block;
-    margin-bottom: 1.75em;
+#tblEmployees {
     text-align: center;
+    width: 100%;
+    table-layout: fixed;
 }
 
-    #table-pagination li {
-        display: inline-block;
-    }
+#tblEmployees td, #tblEmployees th{
+     text-align: left;
+}
+
+.col-sm{
+    width: 65px;
+}
+
+.col-md{
+    width: 90px;
+}
+.col-lg{
+    width: 155px;
+}
 
 .page-content {
     background: #eee;
@@ -33,6 +44,10 @@ th {
     color: #fff;
 }
 
+#Actions, #SNo{
+    text-align: center !important;
+}
+
 .modal-header {
     background-color: #337ab7;
     color: #fff;
@@ -46,31 +61,59 @@ input[type=text] {
     padding: 0px 5px;
 }
 
-.close{
+.close {
     cursor: pointer;
     font-size: 30px;
 }
 
-.close:hover{
-    color: white;
-}
+    .close:hover {
+        color: white;
+    }
 
-select, input[type="radio"], .sortable{
+select, input[type="radio"], .sortable {
     cursor: pointer;
 }
 
-.right{
+.right {
     float: right;
 }
 
-.center{
-    text-align: center;
+.center {
+    text-align: center !important;
 }
 
-.btn{
+.btn {
     font-weight: bold;
 }
 
-.ddlAgefilter, .ddlDepartmentsfilter{
-    width: 75%;
+#ddlDepartmentsfilter {
+    width: 70% !important;
 }
+
+#ddlAgefilter {
+    width: 50% !important;
+    padding: 6px 4px !important;
+}
+
+#ddlPageSize {
+    width: 30% !important;
+    padding: 6px 4px !important;
+}
+
+.modal-xl {
+    width: 60%;
+    margin: auto;
+}
+
+#search {
+    position: relative;
+    font-size: 18px;
+    padding-top: 40px;
+    margin: -20px auto 0;
+}
+
+    #search label {
+        position: absolute;
+        left: 17px;
+        top: 51px;
+    }

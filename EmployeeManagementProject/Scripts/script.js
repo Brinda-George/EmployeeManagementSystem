@@ -8,6 +8,7 @@
     var totalPages;
     var filterGender = 0;
     var filterDepartment = '';
+    var isEdit = true;
 
     var ApplyTemplate = function (data) {
         var template = $("#list-template").html();
@@ -16,8 +17,14 @@
         $('#listDiv').processTemplate(data.Employees);
     }
 
+    $.fn.formatJSONDate = function (jsonDate) {
+        var date = eval(jsonDate.replace(/\/Date\((\d+)\)\//gi, "new Date($1)"));
+        return dateFormat(date, "dd/mm/yyyy");
+    }
+
     $.fn.GetData = function () {
-        pageIndex = $('#table-pagination').find('.active > a').text();
+        var pageNo = $('#table-pagination').find('.active > a').text();
+        pageIndex = pageNo == '' ? 1 : pageNo;
         pageSize = $('#ddlPageSize').val();
         if ($(".fa").hasClass('fa-sort-up')) {
             sortOrder = 'ASC';
@@ -39,14 +46,14 @@
     }
 
     $.fn.GetToaster = function (title, message, priority) {
-        $.toaster({ title: title, message: message, priority: priority, timeout: 360000 });
+        $.toaster({ title: title, message: message, priority: priority, timeout: 1200000 });
     }
 
     $.fn.GetEmployeeList = function (pageIndex, pageSize, sortOrder, sortColumn, searchString, filterGender, filterDepartment) {
         $.ajax({
             type: "POST",
             url: "EmployeeList.aspx/GetEmployees",
-            data: JSON.stringify({ "pageIndex": pageIndex, "pageSize": pageSize, "sortOrder": sortOrder, "sortColumn": sortColumn, "searchString": searchString, "filterGender": filterGender, "filterDepartment": filterDepartment  }),
+            data: JSON.stringify({ "pageIndex": pageIndex, "pageSize": pageSize, "sortOrder": sortOrder, "sortColumn": sortColumn, "searchString": searchString, "filterGender": filterGender, "filterDepartment": filterDepartment }),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             beforeSend: function () {
@@ -54,18 +61,20 @@
             },
             success: function (data) {
                 totalPages = data.d.TotalPages;
-                if (data.d.PageContent == false) {
-                    pageIndex = 1;
-                    $('#table-pagination').twbsPagination('show', 1);
-                }
                 if (data.d.Employees.length == 0) {
                     $("#alertMessage").show();
                     $(".divTable").hide();
                 }
-                else {
+                else if (data.d.PageContent == false) {
+                    pageIndex = 1;
+                    $('#table-pagination').twbsPagination('show', 1);
+                } else {
                     $("#alertMessage").hide();
                     $(".divTable").show();
                     ApplyTemplate(data.d);
+                    $('.Date').each(function () {
+                        $(this).html($.fn.formatJSONDate($(this).html()));
+                    });
                 }
                 if (totalPages > 0) {
                     $('#table-pagination').twbsPagination({
@@ -98,23 +107,23 @@
                     });
                 }
                 var visiblePages = $('#table-pagination').find('.page-item').not('.first,.prev,.next,.last');
-                visiblePages.removeClass('disabled');
+                visiblePages.show();//removeClass('disabled');
                 visiblePages.find('a').each(function (index, value) {
                     if (parseInt($(this).html()) > totalPages) {
-                        $(this).parent().closest('li').addClass('disabled');
+                        $(this).parent().closest('li').hide();//addClass('disabled');
                     }
                 });
-                
+
                 if (totalPages <= visiblePages.length) {
                     $('#table-pagination').find('.next,.last').not('.disabled').addClass('disabled');
 
-                    
+
                 } else {
                     $('#table-pagination').find('.first,.prev,.next,.last').removeClass('disabled');
                     visiblePages.removeClass('disabled');
                 }
             },
-            complete: function(){
+            complete: function () {
                 $('#listSection').unblock();
             },
             failure: function (response) {
@@ -135,9 +144,6 @@
             data: {},
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            beforeSend: function () {
-                $.blockUI({ message: "<h4><i class='fa fa-lg fa-spinner fa-pulse'></i> Loading...</h4>" });
-            },
             success: function (data) {
                 var option = '<option value="0">--select--</option>'
                 for (var i = 18; i <= 60; i++) {
@@ -161,9 +167,10 @@
                     $("#ddlDepartments").append($("<option></option>").val(this['Value']).html(this['Text']));
                     $("#ddlDepartmentsfilter").append($("<option></option>").val(this['Value']).html(this['Text']));
                 });
-            },
-            complete: function () {
-                $.unblockUI();
+                $("#ddlCountries").empty().append('<option value="0">--select--</option>');
+                $.each(data.d.CountryList, function () {
+                    $("#ddlCountries").append($("<option></option>").val(this['Value']).html(this['Text']));
+                });
             },
             failure: function (response) {
                 var responseText = jQuery.parseJSON(response.responseText)
@@ -180,11 +187,22 @@
         $('#empId').val("");
         $('#txtFirstName').val("");
         $('#txtLastName').val("");
+        $('#txtPassword').val("");
+        $('#txtConfirmPassword').val("");
         $("#ddlAge").val("0");
-        $('table').find('input:radio').prop('checked', false);
-        $('table').find('input:radio[value=Male]').prop('checked', true);
+        $('#addEmployeeTable').find('input:radio').prop('checked', false);
+        $('#addEmployeeTable').find('input:radio[value=Male]').prop('checked', true);
         $("#ddlQualifications").val("0");
         $("#ddlDepartments").val("0");
+        $('#txtAddress').val("");
+        $('#txtCity').val("");
+        $('#txtState').val("");
+        $("#ddlCountries").val("0");
+        $('#txtMobile').val("");
+        $('#txtEmail').val("");
+        $('#txtExperience').val("0");
+        $('#txtDateOfBirth').val("");
+        $('[id^="lbl"]').empty();
     }
 
     $.fn.AddEditEmployee = function (employee) {
@@ -198,11 +216,11 @@
                 $.blockUI({ message: "<h4><i class='fa fa-lg fa-spinner fa-pulse'></i> Loading...</h4>" });
             },
             success: function (response) {
+                $('#addEmployeeModal').modal("hide");
                 $.fn.GetData();
                 $.fn.GetEmployeeList(pageIndex, pageSize, sortOrder, sortColumn, searchString, filterGender, filterDepartment);
-                $.fn.GetToaster('Success', response.d, 'success');
                 $.fn.ResetForm();
-                $('#addEmployeeModal').modal("hide");
+                $.fn.GetToaster('Success', data.d, 'success');
             },
             complete: function () {
                 $.unblockUI();
@@ -232,6 +250,8 @@
                 $('#empId').val(data.d.ID);
                 $('#txtFirstName').val(data.d.FirstName);
                 $('#txtLastName').val(data.d.LastName);
+                $('#txtPassword').val(data.d.Password);
+                $('#txtConfirmPassword').val(data.d.Password);
                 $("#ddlAge").val(data.d.Age);
                 if (data.d.Gender == "Male") {
                     $('table').find('input:radio[value=Male]').prop('checked', true);
@@ -241,10 +261,30 @@
                 }
                 $("#ddlQualifications").val(data.d.QualificationId);
                 $("#ddlDepartments").val(data.d.DepartmentId);
-                $('.modal-title').empty().html('<i class="fa fa-address-card"></i>&nbsp;&nbsp;Edit Employee');
-                $('#btnInsertEmployee').empty().html('<i class="fa fa-edit"></i>&nbsp;&nbsp;Edit');
-                $('#btnInsertEmployee').attr('title', 'Edit Employee');
+                $('#txtAddress').val(data.d.Address);
+                $('#txtCity').val(data.d.City);
+                $('#txtState').val(data.d.State);
+                $('#ddlCountries').val(data.d.CountryId);
+                $('#txtExperience').val(data.d.Experience);
+                $('#txtEmail').val(data.d.Email);
+                $('#txtMobile').val(data.d.Mobile);
+                var date = $.fn.formatJSONDate(data.d.DateOfBirth).split("/").reverse().join("-");
+                $('#txtDateOfBirth').val(date);
                 $('#addEmployeeTable').find('.text-danger').empty();
+                if (isEdit) {
+                    $('.modal-title').empty().html('<i class="fa fa-address-card"></i>&nbsp;&nbsp;Edit Employee');
+                    $("#addEmployeeTable :input").prop("disabled", false);
+                    $('#btnInsertEmployee').empty().html('<i class="fa fa-edit"></i>&nbsp;&nbsp;Update');
+                    $('#btnInsertEmployee').attr('title', 'Edit Employee');
+                    $('#btnInsertEmployee').show();
+                    $('#empPassword').show();
+                }
+                else {
+                    $('.modal-title').empty().html('<i class="fa fa-user"></i>&nbsp;&nbsp;View Employee');
+                    $("#addEmployeeTable :input").prop("disabled", true);
+                    $('#btnInsertEmployee').hide();
+                    $('#empPassword').hide();
+                }
                 $('#addEmployeeModal').modal("show");
                 $('#btnReset').hide();
             },
@@ -330,7 +370,7 @@
             });
         });
 
-    $('#btnSearch').click(function () {
+    $('#txtSearch').keyup(function () {
         $.fn.GetData();
         $.fn.GetEmployeeList(pageIndex, pageSize, sortOrder, sortColumn, searchString, filterGender, filterDepartment);
     });
@@ -340,13 +380,15 @@
         $('#btnInsertEmployee').empty().html('<i class="fa fa-save"></i>&nbsp;&nbsp;Add');
         $('#btnInsertEmployee').attr('title', 'Add Employee');
         $.fn.ResetForm();
+        $("#addEmployeeTable :input").prop("disabled", false);
+        $('#btnInsertEmployee').show();
         $('#addEmployeeModal').modal("show");
+        $('#empPassword').show();
         $('#btnReset').show();
     });
 
     $('#btnReset').click(function () {
         $.fn.ResetForm();
-        $('#addEmployeeModal').modal("show");
     });
 
     $('#btnInsertEmployee').click(function () {
@@ -358,42 +400,142 @@
         employee.QualificationId = $("#ddlQualifications").val();
         employee.DepartmentId = $("#ddlDepartments").val();
         employee.ID = $('#empId').val();
+        employee.DateOfBirth = $("#txtDateOfBirth").val();
+        employee.Address = $("#txtAddress").val();
+        employee.City = $("#txtCity").val();
+        employee.State = $("#txtState").val();
+        employee.CountryId = $("#ddlCountries").val();
+        employee.Experience = $("#txtExperience").val();
+        employee.Mobile = $("#txtMobile").val();
+        employee.Email = $("#txtEmail").val();
+        employee.Password = $("#txtPassword").val();
+        var confirmPassword = $("#txtConfirmPassword").val();
         var tb = $('#addEmployeeTable');
         var flag = 0;
         if ($.trim(employee.FirstName) == "") {
-            tb.find('#lblFirstName').html('The First Name field is required');
+            tb.find('#lblFirstName').html('First Name is required');
             flag = 1;
         }
         else {
             tb.find('#lblFirstName').empty();
         }
         if ($.trim(employee.LastName) == "") {
-            tb.find('#lblLastName').html('The Last Name field is required');
+            tb.find('#lblLastName').html('Last Name is required');
             flag = 1;
         }
         else {
             tb.find('#lblLastName').empty();
         }
         if (employee.Age == "0") {
-            tb.find('#lblAge').html('The Age field is required');
+            tb.find('#lblAge').html('Age is required');
             flag = 1;
         }
         else {
             tb.find('#lblAge').empty();
         }
         if (employee.QualificationId == "0") {
-            tb.find('#lblQualifications').html('The Qualifications field is required');
+            tb.find('#lblQualifications').html('Qualifications is required');
             flag = 1;
         }
         else {
             tb.find('#lblQualifications').empty();
         }
         if (employee.DepartmentId == "0") {
-            tb.find('#lblDepartments').html('The Departments field is required');
+            tb.find('#lblDepartments').html('Department is required');
             flag = 1;
         }
         else {
             tb.find('#lblDepartments').empty();
+        }
+        if ($.trim(employee.Address) == "") {
+            tb.find('#lblAddress').html('Address is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblAddress').empty();
+        }
+        if ($.trim(employee.City) == "") {
+            tb.find('#lblCity').html('City is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblCity').empty();
+        }
+        if ($.trim(employee.State) == "") {
+            tb.find('#lblState').html('State is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblState').empty();
+        }
+        if (employee.CountryId == "0") {
+            tb.find('#lblCountries').html('Country is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblCountries').empty();
+        }
+        if ($.trim(employee.Experience) == "") {
+            tb.find('#lblExperience').html('Experience is required');
+            flag = 1;
+        }
+        else if ($.trim(employee.Experience) > 60) {
+            tb.find('#lblExperience').html('Experience is cannot be greater than 60');
+            flag = 1;
+        }
+        else if ($.trim(employee.Experience) < 0) {
+            tb.find('#lblExperience').html('Experience is cannot be negative');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblExperience').empty();
+        }
+        if ($.trim(employee.Mobile) == "") {
+            tb.find('#lblMobile').html('Mobile Number is required');
+            flag = 1;
+        }
+        else if ($.trim(employee.Mobile).length != 10) {
+            tb.find('#lblMobile').html('A valid Mobile Number is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblMobile').empty();
+        }
+        if ($.trim(employee.Email) == "") {
+            tb.find('#lblEmail').html('Email is required');
+            flag = 1;
+        }
+        else if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(employee.Email))) {
+            $('#lblEmail').html('A valid Email is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblEmail').empty();
+        }
+        if ($.trim(employee.DateOfBirth) == "") {
+            tb.find('#lblDateOfBirth').html('Date Of Birth is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblDateOfBirth').empty();
+        }
+        if ($.trim(employee.Password) == "") {
+            tb.find('#lblPassword').html('Password is required');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblPassword').empty();
+        }
+        if ($.trim(confirmPassword) == "") {
+            tb.find('#lblConfirmPassword').html('Please confirm Password');
+            flag = 1;
+        }
+        else if ($.trim(employee.Password) != $.trim(confirmPassword)) {
+            tb.find('#lblConfirmPassword').html('Password and confirm Password must match');
+            flag = 1;
+        }
+        else {
+            tb.find('#lblConfirmPassword').empty();
         }
         if (flag == 1) {
             return false;
@@ -404,18 +546,22 @@
         $.fn.AddEditEmployee(employee);
     });
 
-    $("body").on("click", "[id=tblEmployees] .Edit", function () {
-        //var id = $(this).closest("tr")
-        //           .find(".empid")
-        //           .text();
+    $("body").on("click", "[id=tblEmployees] .View", function () {
         var editId = this.id;
-        var id = editId.substring(editId.indexOf("-") + 1);
+        var id = editId.substring(editId.indexOf("_") + 1);
+        isEdit = false;
+        $.fn.GetEmployeeById(id);
+    });
+
+    $("body").on("click", "[id=tblEmployees] .Edit", function () {
+        var editId = this.id;
+        var id = editId.substring(editId.indexOf("_") + 1);
+        isEdit = true;
         $.fn.GetEmployeeById(id);
     });
 
     $("body").on("click", "[id=tblEmployees] .Delete", function () {
-        var deleteId = this.id;
-        var id = deleteId.substring(deleteId.indexOf("-") + 1);
+        var id = this.id.substring(deleteId.indexOf("_") + 1);
         $.confirm({
             icon: 'fa fa-warning',
             title: 'Alert',
@@ -442,19 +588,21 @@
         $.fn.GetEmployeeList(pageIndex, pageSize, sortOrder, sortColumn, searchString, filterGender, filterDepartment);
     });
 
-    $.fn.ExportToPdf = function (tableHtml)
-    {
+    $.fn.ExportToPdf = function () {
+        $.fn.GetData();
         $.ajax({
             type: "POST",
             url: "EmployeeList.aspx/GeneratePdf",
-            //data: '{}',
-            //contentType: "application/json; charset=utf-8",
-            //dataType: "json",
+            data: JSON.stringify({ "sortOrder": sortOrder, "sortColumn": sortColumn, "searchString": searchString, "filterGender": filterGender, "filterDepartment": filterDepartment }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
             beforeSend: function () {
                 $.blockUI({ message: "<h4><i class='fa fa-lg fa-spinner fa-pulse'></i> Loading...</h4>" });
             },
             success: function (data) {
-                $.fn.GetToaster('Success', data.d, 'success');
+                $('#aPdfFile').prop('href', data.d);
+                $("#aPdfFile").trigger("click");
+                $.fn.GetToaster('Success', 'Exported to pdf successfully!!', 'success');
             },
             complete: function () {
                 $.unblockUI();
@@ -464,68 +612,53 @@
                 $.fn.GetToaster('Error', response.Message, 'danger');
             },
             error: function (response, exception) {
-                var msg = '';
-                if (response.status === 0) {
-                    msg = 'Not connect.\n Verify Network.';
-                } else if (response.status == 404) {
-                    msg = 'Requested page not found. [404]';
-                } else if (response.status == 500) {
-                    msg = 'Internal Server Error [500].';
-                } else if (exception === 'parsererror') {
-                    msg = 'Requested JSON parse failed.';
-                } else if (exception === 'timeout') {
-                    msg = 'Time out error.';
-                } else if (exception === 'abort') {
-                    msg = 'Ajax request aborted.';
-                } else {
-                    msg = 'Uncaught Error.\n' + response.responseText;
-                }
-                alert(msg);
-                //var responseText = jQuery.parseJSON(response.responseText)
-                //$.fn.GetToaster('Error', response.Message, 'danger');
+                var responseText = jQuery.parseJSON(response.responseText)
+                $.fn.GetToaster('Error', response.Message, 'danger');
             }
         });
     }
 
     $("#btnExport").click(function () {
-        $("[id*=hfExportPdf]").val($("#pdfTable").html());
-        $.fn.ExportToPdf($("[id*=hfExportPdf]").val());
+        $.fn.ExportToPdf();
     });
 
-    //$("form[name='addEmployeeForm']").validate({
-    //    rules: {
-    //        firstname: "required",
-    //        lastname: "required",
-    //        age: "required",
-    //        Gender: "required",
-    //        qualifications: "required",
-    //        departments: "required"
-    //        //email: {
-    //        //    required: true,
-    //        //    email: true
-    //        //},
-    //        //password: {
-    //        //    required: true,
-    //        //    minlength: 5
-    //        //}
-    //    },
-    //    messages: {
-    //        firstname: "Please enter firstname",
-    //        lastname: "Please enter lastname",
-    //        age: "Please select age",
-    //        Gender: "Please select gender",
-    //        qualifications: "Please select qualification",
-    //        departments: "Please select department"
-    //        //password: {
-    //        //    required: "Please provide a password",
-    //        //    minlength: "Your password must be at least 5 characters long"
-    //        //},
-    //        //email: "Please enter a valid email address"
-    //    },
-    //    submitHandler: function (form) {
-    //        form.submit();
-    //    }
-    //});
+    $.fn.ExportToExcel = function () {
+        $.fn.GetData();
+        $.ajax({
+            type: "POST",
+            url: "EmployeeList.aspx/GenerateExcel",
+            data: JSON.stringify({ "sortOrder": sortOrder, "sortColumn": sortColumn, "searchString": searchString, "filterGender": filterGender, "filterDepartment": filterDepartment }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $.blockUI({ message: "<h4><i class='fa fa-lg fa-spinner fa-pulse'></i> Loading...</h4>" });
+            },
+            success: function (data) {
+                $('#aExcelFile').prop('href', data.d);
+                $("#aExcelFile").trigger("click");
+                $.fn.GetToaster('Success', 'Exported to excel successfully!!', 'success');
+            },
+            complete: function () {
+                $.unblockUI();
+            },
+            failure: function (response) {
+                var responseText = jQuery.parseJSON(response.responseText);
+                $.fn.GetToaster('Error', response.Message, 'danger');
+            },
+            error: function (response) {
+                var responseText = jQuery.parseJSON(response.responseText)
+                $.fn.GetToaster('Error', response.Message, 'danger');
+            }
+        });
+    }
 
+    $("#btnExportExcel").click(function () {
+        $.fn.ExportToExcel();
+    });
+
+    $('#aExcelFile,#aPdfFile').click(function (e) {
+        e.preventDefault();
+        window.location.href = $(this).attr('href');
+    });
 
 });
