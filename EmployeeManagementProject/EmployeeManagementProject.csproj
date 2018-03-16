@@ -242,6 +242,7 @@
     <Content Include="Content\jquery-confirm.min.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Content\styles.css" />
+    <Content Include="Default.aspx" />
     <Content Include="EmployeeDetails.aspx" />
     <Content Include="EmployeeList.aspx" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -467,6 +468,13 @@
     </Compile>
     <Compile Include="Contact.aspx.designer.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
     <Compile Include="EmployeeDetails.aspx.cs">
       <DependentUpon>EmployeeDetails.aspx</DependentUpon>

@@ -33,7 +33,7 @@ namespace EmployeeManagementProject.Account
             CanRemoveExternalLogins = manager.GetLogins(User.Identity.GetUserId()).Count() > 1;
 
             SuccessMessage = String.Empty;
-            successMessage.Visible = !String.IsNullOrEmpty(SuccessMessage);
+            //successMessage.Visible = !String.IsNullOrEmpty(SuccessMessage);
         }
 
         public IEnumerable<UserLoginInfo> GetLogins()

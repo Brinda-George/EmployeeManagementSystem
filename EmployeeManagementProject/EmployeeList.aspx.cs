@@ -506,31 +506,57 @@ namespace EmployeeManagementProject
             {
                 fileInfo.Delete();
             }
-            Rectangle pagesize = new Rectangle(20, 20, PageSize.A4.Width, PageSize.A4.Height);
+            Rectangle pagesize = new Rectangle(20, 20, PageSize.A4.Height, PageSize.A4.Width);
             Document doc = new Document(pagesize, 10, 10, 50, 10);
+            //doc.SetPageSize(PageSize.A4.Rotate());
             MemoryStream ms = new MemoryStream();
             PdfWriter pw = PdfWriter.GetInstance(doc, ms);
             doc.Open();
 
-            PdfPTable tbl = new PdfPTable(8);
-            tbl.AddCell("S No");
-            tbl.AddCell("Emp No");
-            tbl.AddCell("First Name");
-            tbl.AddCell("Last Name");
-            tbl.AddCell("Age");
-            tbl.AddCell("Gender");
-            tbl.AddCell("Qualification");
-            tbl.AddCell("Department");
+            PdfPTable tbl = new PdfPTable(16);
+            tbl.HorizontalAlignment = 0;
+            tbl.TotalWidth = 800f;
+            tbl.LockedWidth = true;
+            float[] widths = new float[] { 20f, 45f, 55f, 55f, 20f, 45f, 50f, 55f, 50f, 80f, 50f, 50f, 50f, 45f, 50f, 80f};
+            tbl.SetWidths(widths);
+            BaseFont bf = BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, BaseFont.EMBEDDED);
+            Font headerfont = new Font(bf, 9, Font.BOLD);
+            Font font = new Font(bf, 9);
+            tbl.HeaderRows = 1;
+            tbl.AddCell(new PdfPCell(new Phrase("S.\nNO.", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Emp No", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("First Name", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Last Name", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Age", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Gender", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("DOB", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Qualification", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Department", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Address", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("City", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("State", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Country", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Experience", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Mobile", headerfont)) { GrayFill = 0.95f });
+            tbl.AddCell(new PdfPCell(new Phrase("Email", headerfont)) { GrayFill = 0.95f });
             for (int i = 0; i < employees.Count(); i++)
             {
-                tbl.AddCell((i + 1).ToString());
-                tbl.AddCell("EMP-" + employees[i].ID.ToString());
-                tbl.AddCell(employees[i].FirstName);
-                tbl.AddCell(employees[i].LastName);
-                tbl.AddCell(employees[i].Age.ToString());
-                tbl.AddCell(employees[i].Gender);
-                tbl.AddCell(employees[i].Qualification);
-                tbl.AddCell(employees[i].Department);
+                tbl.AddCell(new Phrase((i + 1).ToString(), font));
+                tbl.AddCell(new Phrase("EMP-" + employees[i].ID.ToString(), font));
+                tbl.AddCell(new Phrase(employees[i].FirstName, font));
+                tbl.AddCell(new Phrase(employees[i].LastName, font));
+                tbl.AddCell(new Phrase(employees[i].Age.ToString(), font));
+                tbl.AddCell(new Phrase(employees[i].Gender, font));
+                tbl.AddCell(new Phrase(employees[i].DateOfBirth.ToString(), font));
+                tbl.AddCell(new Phrase(employees[i].Qualification, font));
+                tbl.AddCell(new Phrase(employees[i].Department, font));
+                tbl.AddCell(new Phrase(employees[i].Address, font));
+                tbl.AddCell(new Phrase(employees[i].City, font));
+                tbl.AddCell(new Phrase(employees[i].State, font));
+                tbl.AddCell(new Phrase(employees[i].Country, font));
+                tbl.AddCell(new Phrase(employees[i].Experience.ToString(), font));
+                tbl.AddCell(new Phrase(employees[i].Mobile, font));
+                tbl.AddCell(new Phrase(employees[i].Email, font));
             }
             doc.Add(tbl);
             doc.Close();
